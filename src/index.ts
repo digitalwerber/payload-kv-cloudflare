@@ -38,6 +38,8 @@ export type CloudflareKVAdapterOptions = {
 
 // Workers KV limits
 const MAX_KEY_BYTES = 512
+// '#' and a SHA-256 in hex, the end of shortened keys
+const HASH_SUFFIX_BYTES = 65
 const MAX_METADATA_BYTES = 1024
 const MIN_TTL = 60
 
@@ -55,6 +57,12 @@ export class CloudflareKVAdapter implements KVAdapter {
   readonly namespace: KVNamespaceLike
 
   constructor({ keyPrefix = 'payload-kv:', namespace, ttl = {} }: CloudflareKVAdapterOptions) {
+    if (byteLength(keyPrefix) > MAX_KEY_BYTES - HASH_SUFFIX_BYTES) {
+      // Shortened keys would lose part of the prefix, so keys() and clear() could not find them
+      throw new Error(
+        `keyPrefix too long for Workers KV: at most ${MAX_KEY_BYTES - HASH_SUFFIX_BYTES} bytes`,
+      )
+    }
     this.keyPrefix = keyPrefix
     this.namespace = namespace
     this.ttl = Object.entries(ttl).sort(([a], [b]) => b.length - a.length)
@@ -85,7 +93,7 @@ export class CloudflareKVAdapter implements KVAdapter {
     let bytes = 0
     for (const char of name) {
       bytes += byteLength(char)
-      if (bytes > MAX_KEY_BYTES - suffix.length) {
+      if (bytes > MAX_KEY_BYTES - HASH_SUFFIX_BYTES) {
         break
       }
       head += char
