@@ -1,12 +1,12 @@
-import { payloadKvCloudflare } from '@digitalwerber/payload-kv-cloudflare'
+import { cloudflareKVAdapter } from '@digitalwerber/payload-kv-cloudflare'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { namespace } from './helpers/kv.js'
 import { testEmailAdapter } from './helpers/testEmailAdapter.js'
 import { seed } from './seed.js'
 
@@ -54,22 +54,13 @@ const buildConfigWithMemoryDB = async () => {
     }),
     editor: lexicalEditor(),
     email: testEmailAdapter,
+    kv: cloudflareKVAdapter({ namespace }),
     onInit: async (payload) => {
       await seed(payload)
     },
-    plugins: [
-      payloadKvCloudflare({
-        collections: {
-          posts: true,
-        },
-      }),
-    ],
     secret: process.env.PAYLOAD_SECRET || 'test-secret_key',
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
-    },
-    upload: {
-      transformers: [sharpTransformer()],
     },
   })
 }
