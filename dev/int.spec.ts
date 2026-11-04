@@ -80,6 +80,12 @@ describe('cloudflareKVAdapter', () => {
     await expect(kv.set('x'.repeat(1100), 1)).rejects.toThrow('Key too long')
   })
 
+  test('rejects key prefixes that shortened keys could not keep', () => {
+    expect(() => new CloudflareKVAdapter({ keyPrefix: 'x'.repeat(448), namespace })).toThrow(
+      'keyPrefix too long',
+    )
+  })
+
   test('keys and clear page through more than one list page', async () => {
     const kv = new CloudflareKVAdapter({ keyPrefix: 'many:', namespace })
     const keys = Array.from({ length: 1500 }, (_, i) => `posts:${i}`)
