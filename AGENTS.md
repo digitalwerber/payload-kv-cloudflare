@@ -16,7 +16,7 @@ Everything in this repo (code, comments, README, commit messages, branch names, 
 - Supported Payload versions: `peerDependencies`, the CI matrix and the README list the same ones. The README names them without reasoning.
 - SemVer. Every major version states its Payload compatibility in the README and release notes.
 - Format with `pnpm exec oxfmt`, then `pnpm lint`, `pnpm build`, `pnpm test:int` before every push.
-- The README is for users of the plugin: install, options, supported Payload versions, limits and costs.
+- The README is for users of the plugin: install, options, supported Payload versions and limits. No prices, quotas or other facts about third-party services that change without a release of this plugin; link to the provider's page if needed.
 
 ## Workflow
 
