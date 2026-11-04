@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Payload ${{ matrix.payload }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # npm version specs; drop "^3" if the plugin supports Payload 4 only, use "^4" once 4.0 is stable
+        payload: ['beta']
+    env:
+      # The Payload packages in devDependencies, moved to the matrix version together
+      PAYLOAD_PACKAGES: payload @payloadcms/next @payloadcms/ui @payloadcms/richtext-lexical @payloadcms/db-mongodb @payloadcms/transformer-sharp
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Payload ${{ matrix.payload }}
+        run: pnpm add -D $(for p in $PAYLOAD_PACKAGES; do printf '%s@%s ' "$p" "${{ matrix.payload }}"; done)
+      - run: pnpm exec oxfmt --check .
+      - run: pnpm lint
+      - run: pnpm build
+      - run: pnpm test:int
+
+  wordlist:
+    name: Blocked terms
+    # Fork PRs get no secrets and fail here on purpose: a skipped required check would count as passed
+    runs-on: ubuntu-latest
+    steps:
+      # Pinned to a commit like in release.yml: jobs with a secret or token pin, the others use tags
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - name: No blocked term in tree, file names, branch or commits
+        env:
+          WORDLIST: ${{ secrets.PLUGIN_WORDLIST }}
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+        # Prints locations only, never the matching text: the log is public
+        run: |
+          terms="$RUNNER_TEMP/terms"
+          printf '%s\n' "$WORDLIST" | grep -v -e '^#' -e '^[[:space:]]*$' > "$terms" || {
+            echo "::error::Secret PLUGIN_WORDLIST is missing or empty"
+            exit 1
+          }
+          fail=0
+          hits=$(git grep -l -i -F -f "$terms") && { printf '%s\n' "$hits" | sed 's/.*/::error file=&::blocked term/'; fail=1; }
+          git ls-files | grep -i -F -f "$terms" > /dev/null && { echo "::error::blocked term in a file name"; fail=1; }
+          echo "$BRANCH" | grep -i -F -f "$terms" > /dev/null && { echo "::error::blocked term in the branch name"; fail=1; }
+          if git cat-file -e "$BASE^{commit}" 2>/dev/null; then range="$BASE..HEAD"; else range=HEAD; fi
+          for c in $(git rev-list $range); do
+            # Message and patch; merges against their first parent like in the hook
+            git show --format=%B --diff-merges=first-parent "$c" | grep -i -F -f "$terms" > /dev/null && { echo "::error::blocked term in commit $c"; fail=1; }
+          done
+          exit $fail
