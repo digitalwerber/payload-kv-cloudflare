@@ -19,11 +19,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # npm version specs; drop "^3" if the plugin supports Payload 4 only, use "^4" once 4.0 is stable
-        payload: ['beta']
+        # npm version specs: the lowest supported 3.x (first with KV), the latest 3.x, 4 beta; use "^4" once 4.0 is stable
+        payload: ['3.62.0', '^3', 'beta']
     env:
       # The Payload packages in devDependencies, moved to the matrix version together
-      PAYLOAD_PACKAGES: payload @payloadcms/next @payloadcms/ui @payloadcms/richtext-lexical @payloadcms/db-mongodb @payloadcms/transformer-sharp
+      PAYLOAD_PACKAGES: payload @payloadcms/next @payloadcms/ui @payloadcms/richtext-lexical @payloadcms/db-mongodb
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
