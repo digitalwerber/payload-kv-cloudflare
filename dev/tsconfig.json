@@ -20,12 +20,6 @@
       ],
       "@digitalwerber/payload-kv-cloudflare": [
         "../src/index.ts"
-      ],
-      "@digitalwerber/payload-kv-cloudflare/client": [
-        "../src/exports/client.ts"
-      ],
-      "@digitalwerber/payload-kv-cloudflare/rsc": [
-        "../src/exports/rsc.ts"
       ]
     },
     "noEmit": true,
