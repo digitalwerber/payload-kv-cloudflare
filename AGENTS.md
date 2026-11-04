@@ -6,12 +6,7 @@ Built from `create-payload-app --template plugin`: the plugin lives in `src/`, `
 
 ## Public repo
 
-This repo is public from its first commit. Everything in it (code, comments, README, commit messages, branch names, issues, PRs, review replies, release notes) is in English and stands on its own:
-
-- Examples, names, test data and reasoning stay generic and describe what the plugin does for any Payload project. Examples use generic Payload data (`posts`, `media`, `users`).
-- Commits carry the GitHub noreply address set in `git config user.email`.
-- The `pre-push` hook checks author emails and blocked terms. Never bypass it (`--no-verify`). On a hit, rewrite the commits (`git commit --amend`, `git rebase`) before pushing: pushed history stays public.
-- The hook does not see PR texts, comments, issues or release notes: reread them before posting.
+Everything in this repo (code, comments, README, commit messages, branch names, issues, PRs, review replies, release notes) is in English. Examples, names and test data stay generic and describe what the plugin does for any Payload project; examples use generic Payload data (`posts`, `media`, `users`).
 
 ## Conventions
 
@@ -21,7 +16,7 @@ This repo is public from its first commit. Everything in it (code, comments, REA
 - Supported Payload versions: `peerDependencies`, the CI matrix and the README list the same ones. The README names them without reasoning.
 - SemVer. Every major version states its Payload compatibility in the README and release notes.
 - Format with `pnpm exec oxfmt`, then `pnpm lint`, `pnpm build`, `pnpm test:int` before every push.
-- The README is for users of the plugin: install, options, supported Payload versions, limits and costs.
+- The README is for users of the plugin: install, options, supported Payload versions and limits. No prices, quotas or other facts about third-party services that change without a release of this plugin; link to the provider's page if needed.
 
 ## Workflow
 
