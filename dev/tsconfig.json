@@ -1,0 +1,34 @@
+{
+  "extends": "../tsconfig.json",
+  "exclude": [],
+  "include": [
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.mjs",
+    "**/*.cjs",
+    "**/*.ts",
+    "**/*.tsx",
+    "../src/**/*.ts",
+    "../src/**/*.tsx",
+    "next.config.mjs",
+    ".next/types/**/*.ts"
+  ],
+  "compilerOptions": {
+    "paths": {
+      "@payload-config": [
+        "./payload.config.ts"
+      ],
+      "@digitalwerber/payload-kv-cloudflare": [
+        "../src/index.ts"
+      ],
+      "@digitalwerber/payload-kv-cloudflare/client": [
+        "../src/exports/client.ts"
+      ],
+      "@digitalwerber/payload-kv-cloudflare/rsc": [
+        "../src/exports/rsc.ts"
+      ]
+    },
+    "noEmit": true,
+    "emitDeclarationOnly": false,
+  }
+}
